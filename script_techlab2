@@ -1,0 +1,331 @@
+# 🧩 usuarios.py (con validaciones)
+# import csv
+
+# RUTA_USUARIOS = "data/usuarios.csv"
+
+# def cargar_usuarios():
+#     try:
+#         with open(RUTA_USUARIOS, newline="", encoding="utf-8") as archivo:
+#             return list(csv.DictReader(archivo))
+#     except FileNotFoundError:
+#         print("❌ Error: usuarios.csv no encontrado")
+#         return []
+
+# def login():
+#     usuarios = cargar_usuarios()
+#     if not usuarios:
+#         return False
+
+#     intentos = 0
+#     while intentos < 3:
+#         usuario = input("Usuario: ").strip()
+#         contrasena = input("Contraseña: ").strip()
+
+#         for u in usuarios:
+#             if u["usuario"] == usuario and u["contrasena"] == contrasena:
+#                 print("✅ Login exitoso\n")
+#                 return True
+
+#         intentos += 1
+#         print(f"❌ Credenciales incorrectas ({intentos}/3)")
+
+#     print("⛔ Demasiados intentos. Programa finalizado.")
+#     return False
+
+# 🧩 equipos.py (con validaciones)
+# import csv
+# from datetime import datetime
+
+# RUTA_EQUIPOS = "data/equipos.csv"
+
+# def cargar_equipos():
+#     try:
+#         with open(RUTA_EQUIPOS, newline="", encoding="utf-8") as archivo:
+#             return list(csv.DictReader(archivo))
+#     except FileNotFoundError:
+#         return []
+
+# def guardar_equipos(equipos):
+#     try:
+#         with open(RUTA_EQUIPOS, "w", newline="", encoding="utf-8") as archivo:
+#             campos = ["equipo_id","nombre_equipo","categoria","estado_actual","fecha_registro","descripcion"]
+#             escritor = csv.DictWriter(archivo, fieldnames=campos)
+#             escritor.writeheader()
+#             escritor.writerows(equipos)
+#     except Exception as e:
+#         print("❌ Error al guardar equipos:", e)
+
+# def registrar_equipo(equipos):
+#     equipo_id = input("ID del equipo: ").strip()
+#     if any(e["equipo_id"] == equipo_id for e in equipos):
+#         print("❌ El ID ya existe")
+#         return
+
+#     nombre = input("Nombre: ").strip()
+#     categoria = input("Categoría: ").strip()
+
+#     if not nombre or not categoria:
+#         print("❌ Campos obligatorios vacíos")
+#         return
+
+#     equipo = {
+#         "equipo_id": equipo_id,
+#         "nombre_equipo": nombre,
+#         "categoria": categoria,
+#         "estado_actual": "DISPONIBLE",
+#         "fecha_registro": datetime.now().strftime("%Y-%m-%d"),
+#         "descripcion": input("Descripción (opcional): ").strip()
+#     }
+
+#     equipos.append(equipo)
+#     guardar_equipos(equipos)
+#     print("✅ Equipo registrado correctamente")
+
+# def listar_equipos(equipos):
+#     if not equipos:
+#         print("No hay equipos registrados")
+#         return
+
+#     for e in equipos:
+#         print(f"{e['equipo_id']} | {e['nombre_equipo']} | {e['categoria']} | {e['estado_actual']}")
+
+# def actualizar_estado_equipo(equipos, equipo_id, estado):
+#     for e in equipos:
+#         if e["equipo_id"] == equipo_id:
+#             e["estado_actual"] = estado
+#             guardar_equipos(equipos)
+#             return
+
+# 🧩 prestamos.py (VALIDACIONES COMPLETAS)
+# import csv
+# from datetime import datetime
+# from equipos import actualizar_estado_equipo
+
+# RUTA_PRESTAMOS = "data/prestamos.csv"
+
+# LIMITES = {
+#     "ESTUDIANTE": 3,
+#     "INSTRUCTOR": 7,
+#     "ADMINISTRATIVO": 10
+# }
+
+# def cargar_prestamos():
+#     try:
+#         with open(RUTA_PRESTAMOS, newline="", encoding="utf-8") as archivo:
+#             return list(csv.DictReader(archivo))
+#     except FileNotFoundError:
+#         return []
+
+# def guardar_prestamos(prestamos):
+#     try:
+#         with open(RUTA_PRESTAMOS, "w", newline="", encoding="utf-8") as archivo:
+#             campos = [
+#                 "prestamo_id","equipo_id","nombre_equipo","usuario_prestatario",
+#                 "tipo_usuario","fecha_solicitud","fecha_prestamo","fecha_devolucion",
+#                 "dias_autorizados","dias_reales_usados","retraso","estado","mes","anio"
+#             ]
+#             escritor = csv.DictWriter(archivo, fieldnames=campos)
+#             escritor.writeheader()
+#             escritor.writerows(prestamos)
+#     except Exception as e:
+#         print("❌ Error al guardar préstamos:", e)
+
+# def registrar_solicitud(equipos, prestamos):
+#     equipo_id = input("ID del equipo: ").strip()
+#     equipo = next((e for e in equipos if e["equipo_id"] == equipo_id), None)
+
+#     if not equipo:
+#         print("❌ Equipo no existe")
+#         return
+
+#     if equipo["estado_actual"] != "DISPONIBLE":
+#         print("❌ Equipo no disponible")
+#         return
+
+#     tipo = input("Tipo usuario: ").upper().strip()
+#     if tipo not in LIMITES:
+#         print("❌ Tipo de usuario inválido")
+#         return
+
+#     try:
+#         dias = int(input("Días solicitados: "))
+#     except ValueError:
+#         print("❌ Debe ingresar un número")
+#         return
+
+#     if dias <= 0 or dias > LIMITES[tipo]:
+#         print("❌ Días fuera del límite permitido")
+#         return
+
+#     try:
+#         fecha_prestamo = input("Fecha préstamo (YYYY-MM-DD): ").strip()
+#         datetime.strptime(fecha_prestamo, "%Y-%m-%d")
+#     except ValueError:
+#         print("❌ Fecha inválida")
+#         return
+
+#     prestamo = {
+#         "prestamo_id": str(len(prestamos) + 1),
+#         "equipo_id": equipo_id,
+#         "nombre_equipo": equipo["nombre_equipo"],
+#         "usuario_prestatario": input("Nombre solicitante: ").strip(),
+#         "tipo_usuario": tipo,
+#         "fecha_solicitud": datetime.now().strftime("%Y-%m-%d"),
+#         "fecha_prestamo": fecha_prestamo,
+#         "fecha_devolucion": "",
+#         "dias_autorizados": dias,
+#         "dias_reales_usados": "",
+#         "retraso": "",
+#         "estado": "PENDIENTE",
+#         "mes": fecha_prestamo.split("-")[1],
+#         "anio": fecha_prestamo.split("-")[0]
+#     }
+
+#     prestamos.append(prestamo)
+#     guardar_prestamos(prestamos)
+#     print("✅ Solicitud registrada correctamente")
+
+# def aprobar_rechazar(equipos, prestamos):
+#     pendientes = [p for p in prestamos if p["estado"] == "PENDIENTE"]
+
+#     if not pendientes:
+#         print("No hay solicitudes pendientes")
+#         return
+
+#     for p in pendientes:
+#         print(f"{p['prestamo_id']} - {p['nombre_equipo']}")
+
+#     pid = input("ID préstamo: ").strip()
+#     prestamo = next((p for p in prestamos if p["prestamo_id"] == pid), None)
+
+#     if not prestamo:
+#         print("❌ Préstamo no encontrado")
+#         return
+
+#     decision = input("Aprobar (A) / Rechazar (R): ").upper().strip()
+#     if decision not in ("A", "R"):
+#         print("❌ Opción inválida")
+#         return
+
+#     if decision == "A":
+#         prestamo["estado"] = "APROBADO"
+#         actualizar_estado_equipo(equipos, prestamo["equipo_id"], "PRESTADO")
+#     else:
+#         prestamo["estado"] = "RECHAZADO"
+
+#     guardar_prestamos(prestamos)
+#     print("✅ Operación realizada")
+
+# def registrar_devolucion(equipos, prestamos):
+#     activos = [p for p in prestamos if p["estado"] == "APROBADO"]
+
+#     if not activos:
+#         print("No hay préstamos activos")
+#         return
+
+#     for p in activos:
+#         print(f"{p['prestamo_id']} - {p['nombre_equipo']}")
+
+#     pid = input("ID préstamo: ").strip()
+#     prestamo = next((p for p in prestamos if p["prestamo_id"] == pid), None)
+
+#     if not prestamo:
+#         print("❌ Préstamo no encontrado")
+#         return
+
+#     try:
+#         fecha_dev = input("Fecha devolución (YYYY-MM-DD): ").strip()
+#         f_dev = datetime.strptime(fecha_dev, "%Y-%m-%d")
+#         f_prest = datetime.strptime(prestamo["fecha_prestamo"], "%Y-%m-%d")
+#     except ValueError:
+#         print("❌ Fecha inválida")
+#         return
+
+#     dias = (f_dev - f_prest).days
+#     if dias < 0:
+#         print("❌ La fecha de devolución no puede ser anterior")
+#         return
+
+#     prestamo["fecha_devolucion"] = fecha_dev
+#     prestamo["dias_reales_usados"] = dias
+#     prestamo["retraso"] = "SI" if dias > int(prestamo["dias_autorizados"]) else "NO"
+#     prestamo["estado"] = "DEVUELTO"
+
+#     actualizar_estado_equipo(equipos, prestamo["equipo_id"], "DISPONIBLE")
+#     guardar_prestamos(prestamos)
+
+#     print("✅ Devolución registrada correctamente")
+
+# 🧩 reportes.py (con validación)
+# import csv
+
+# def exportar_reporte(prestamos):
+#     mes = input("Mes (MM): ").zfill(2)
+#     anio = input("Año (YYYY): ").strip()
+
+#     filtrados = [
+#         p for p in prestamos
+#         if p["estado"] == "DEVUELTO" and p["mes"] == mes and p["anio"] == anio
+#     ]
+
+#     if not filtrados:
+#         print("❌ No hay préstamos devueltos en ese período")
+#         return
+
+#     nombre = f"reporte_prestamos_{anio}_{mes}.csv"
+
+#     try:
+#         with open(nombre, "w", newline="", encoding="utf-8") as archivo:
+#             escritor = csv.DictWriter(archivo, fieldnames=filtrados[0].keys())
+#             escritor.writeheader()
+#             escritor.writerows(filtrados)
+#         print(f"✅ Reporte generado: {nombre}")
+#     except Exception as e:
+#         print("❌ Error al generar reporte:", e)
+
+# 🧩 main.py (no cambia mucho)
+# from usuarios import login
+# from equipos import *
+# from prestamos import *
+# from reportes import exportar_reporte
+
+# def menu():
+#     equipos = cargar_equipos()
+#     prestamos = cargar_prestamos()
+
+#     while True:
+#         print("""
+# 1. Registrar equipo
+# 2. Listar equipos
+# 3. Solicitar préstamo
+# 4. Aprobar / Rechazar préstamo
+# 5. Registrar devolución
+# 6. Exportar reporte
+# 0. Salir
+# """)
+#         op = input("Opción: ").strip()
+
+#         if op == "1":
+#             registrar_equipo(equipos)
+#         elif op == "2":
+#             listar_equipos(equipos)
+#         elif op == "3":
+#             registrar_solicitud(equipos, prestamos)
+#         elif op == "4":
+#             aprobar_rechazar(equipos, prestamos)
+#         elif op == "5":
+#             registrar_devolucion(equipos, prestamos)
+#         elif op == "6":
+#             exportar_reporte(prestamos)
+#         elif op == "0":
+#             print("👋 Saliendo del sistema")
+#             break
+#         else:
+#             print("❌ Opción inválida")
+
+# def main():
+#     if login():
+#         menu()
+
+# if __name__ == "__main__":
+#     main()
