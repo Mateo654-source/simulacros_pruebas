@@ -1,0 +1,1 @@
+reserva_id,espacio_id,nombre_espacio,usuario_reservante,tipo_usuario,fecha_solicitud,fecha_reserva,horas_autorizadas,horas_reales_usadas,exceso_tiempo,estado,mes,anio
